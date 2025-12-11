@@ -2,7 +2,6 @@ package zmicro
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"os/signal"
@@ -81,7 +80,7 @@ func New(opts ...Option) *App {
 	if err = config.Default().Unmarshal(zc); err != nil {
 		log.Fatal(err.Error())
 	}
-	fmt.Println(zc)
+
 	if zc.App.Name == "" {
 		log.Fatal("配置项app.name不能为空")
 	}
@@ -123,7 +122,11 @@ func New(opts ...Option) *App {
 	if zc.Tracer.Addr != "" {
 		setTracerProvider(zc.Tracer.Addr, zc.App.Name)
 	} else {
-		setNoExporterTracerProvider(zc.App.Name)
+		if options.setTracerProvider != nil {
+			options.setTracerProvider(zc.App.Name)
+		} else {
+			setNoExporterTracerProvider(zc.App.Name)
+		}
 	}
 
 	if app.opts.InitRpcServer != nil {
