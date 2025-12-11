@@ -4,15 +4,17 @@ import (
 	"github.com/zmicro-team/zmicro/core/config"
 	"github.com/zmicro-team/zmicro/core/transport/http"
 	"github.com/zmicro-team/zmicro/core/transport/rpc/server"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type BeforeFunc func() error
 
 type Options struct {
-	InitRpcServer   server.InitRpcServerFunc
-	InitHttpServer  http.InitHttpServerFunc
-	ConfigCallbacks []func(config.IConfig)
-	Before          BeforeFunc
+	InitRpcServer     server.InitRpcServerFunc
+	InitHttpServer    http.InitHttpServerFunc
+	ConfigCallbacks   []func(config.IConfig)
+	Before            BeforeFunc
+	setTracerProvider func(name string) *trace.TracerProvider
 }
 
 type Option func(*Options)
@@ -48,5 +50,11 @@ func ConfigCallbacks(f ...func(config.IConfig)) Option {
 func Before(f BeforeFunc) Option {
 	return func(o *Options) {
 		o.Before = f
+	}
+}
+
+func SetTracerProvider(f func(name string) *trace.TracerProvider) Option {
+	return func(o *Options) {
+		o.setTracerProvider = f
 	}
 }

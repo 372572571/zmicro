@@ -87,9 +87,14 @@ func Log() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-
-			reqBody = buf.String()
-			c.Request.Body = io.NopCloser(buf)
+			// 如果大于200k则不记录
+			if buf.Len() > 200*1024 {
+				reqBody = "skip larger request body"
+				c.Request.Body = io.NopCloser(buf)
+			} else {
+				reqBody = buf.String()
+				c.Request.Body = io.NopCloser(buf)
+			}
 		}
 		c.Writer = &rspWriter{c.Writer, respBodyBuf}
 
