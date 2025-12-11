@@ -2,7 +2,6 @@ package zmicro
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"os/signal"
@@ -58,6 +57,8 @@ type zconfig struct {
 	}
 	Tracer struct {
 		Addr string
+		// Exporter string `json:"exporter"` // exporter select ("jaeger", "zipkin")
+		// Token    string `json:"token"`
 	}
 	Registry struct {
 		BasePath       string
@@ -81,7 +82,7 @@ func New(opts ...Option) *App {
 	if err = config.Default().Unmarshal(zc); err != nil {
 		log.Fatal(err.Error())
 	}
-	fmt.Println(zc)
+
 	if zc.App.Name == "" {
 		log.Fatal("配置项app.name不能为空")
 	}
@@ -122,8 +123,13 @@ func New(opts ...Option) *App {
 	tracing := true // always true for trace id
 	if zc.Tracer.Addr != "" {
 		setTracerProvider(zc.Tracer.Addr, zc.App.Name)
+
 	} else {
-		setNoExporterTracerProvider(zc.App.Name)
+		if options.setTracerProvider != nil {
+			options.setTracerProvider(zc.App.Name)
+		} else {
+			setNoExporterTracerProvider(zc.App.Name)
+		}
 	}
 
 	if app.opts.InitRpcServer != nil {
