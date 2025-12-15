@@ -45,7 +45,8 @@ func (s *Server) Start() error {
 	s.Engine.Use(TransportInterceptor())
 
 	if s.opts.Tracing {
-		s.Engine.Use(tracing.Trace(s.opts.Name))
+		_ = tracing.Trace
+		// s.Engine.Use(tracing.Trace(s.opts.Name))
 	}
 
 	s.Engine.Use(logging.Log())
